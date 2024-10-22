@@ -511,6 +511,104 @@ show tables;
 - Try to create a StatefulSet for postgres.
 - Check (https://hub.docker.com/_/postgres) for information related to the container image.
 
+## ConfigMap
+
+### Create ConfigMap
+
+```bash
+cat <<EOF >kubeapp-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubeapp
+data:
+  MODE: development
+  COLOR: blue
+  SERVICE: kubeapp
+EOF
+
+kubectl apply -f kubeapp-configmap.yaml
+```
+
+### ConfigMap as env variable
+
+```bash
+cat <<EOF >kubeapp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeapp
+  name: kubeapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeapp
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+      - image: kubenesia/kubeapp:1.2.0
+        name: kubeapp
+        envFrom:
+          - configMapRef:
+              name: kubeapp
+EOF
+
+kubectl apply -f kubeapp-deployment.yaml
+kubectl exec -ti -l app=kubeapp -- sh
+printenv
+```
+
+### ConfigMap as file
+
+```bash
+cat <<EOF >kubeapp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeapp
+  name: kubeapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeapp
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+      - image: kubenesia/kubeapp:1.2.0
+        name: kubeapp
+        volumeMounts:
+          - mountPath: /data/config
+            name: config
+      volumes:
+        - name: config
+          configMap:
+            name: kubeapp
+EOF
+
+kubectl apply -f kubeapp-deployment.yaml
+kubectl exec -ti -l app=kubeapp -- sh
+ls /data/config
+cat /data/config
+```
+
+## Secret
+
+### Create Secret
+
+### Secret as env variable
+
+### Secret as file
+
 ## Node selector
 
 - Simplest way to add a constraint for node selection by using node labels as criteria.
