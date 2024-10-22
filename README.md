@@ -216,6 +216,39 @@ kubectl apply -f echo.yaml
 kubectl get pods
 ```
 
+### Deployment rolling update maxUnavailable parameter
+
+```bash
+cat <<EOF >echo.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: echo
+  name: echo
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: echo
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+        - image: registry.k8s.io/echoserver:1.3
+          name: echoserver
+EOF
+
+kubectl apply -f echo.yaml
+kubectl get pods
+```
+
 ### Get container image of a Deployment
 
 ```bash
