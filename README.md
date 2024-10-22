@@ -205,7 +205,7 @@ kubectl rollout history deployment kubeapp
 kubectl create deployment echo --image=registry.k8s.io/echoserver:1.3 --output=yaml --dry-run=client >echo.yaml
 kubectl apply -f echo.yaml
 kubectl get pods
-kubectl set image deployment echoserver=registry.k8s.io/echoserver:1.4
+kubectl set image deployment echo echoserver=registry.k8s.io/echoserver:1.4
 kubectl get pods
 
 vim echo.yaml
