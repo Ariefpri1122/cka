@@ -507,7 +507,7 @@ show tables;
 ### Review
 
 - Try to create a StatefulSet for postgres.
-- Check (https://hub.docker.com/_/postgres) for information related to the container image.
+- Check [here](https://hub.docker.com/_/postgres) for information related to the container image.
 
 ## ConfigMap
 
