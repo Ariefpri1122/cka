@@ -342,6 +342,12 @@ kubectl describe pods -l app=kuard
 ### Review
 
 - Try to create a Deployment with image `gcr.io/kuar-demo/kuard-amd64:blue` with 5 replicas and access port 8080 of the container.
+- Try to create a Deployment with the following spec:
+    - Name: `web`
+    - Two images: `nginx:1.27.2` and `gcr.io/kuar-demo/kuard-amd64:blue`
+    - Replica: 10
+    - Startup probe to nginx
+    - Liveness probe to kuard
 
 ## DaemonSet
 
