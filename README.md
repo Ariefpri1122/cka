@@ -401,9 +401,10 @@ spec:
           path: /var/log
 EOF
 
-kubectl apply -f fluentd-elasticsearch.yaml
+kubectl apply -f fluentd-elasticsearch-daemonset.yaml
 kubectl -n kube-system get ds fluentd-elasticsearch
 kubectl -n kube-system get ds fluentd-elasticsearch -o wide
+kubectl -n kube-system get pods -o wide | grep fluentd
 kubectl delete -f fluentd-elasticsearch.yaml
 ```
 
