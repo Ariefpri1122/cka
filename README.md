@@ -292,6 +292,7 @@ spec:
             port: 6000
 EOF
 
+kubectl apply -f kuard.yaml
 kubectl get pods
 kubectl describe pods -l app=kuard
 ```
