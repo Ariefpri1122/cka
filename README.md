@@ -169,7 +169,7 @@ kubectl port-forward deployment/kubeapp --address 0.0.0.0 8080:8000
 ### Scale Deployment
 
 ```bash
-kubectl scale deployment kubeapp --replicas=2
+kubectl scale deployment kubeapp --replicas=4
 ```
 
 ### Describe Deployment
@@ -185,52 +185,21 @@ kubectl set image deployment kubeapp kubeapp=kubenesia/kubeapp:1.1.0
 watch kubectl get pod -l app=kubeapp
 ```
 
-### Deployment rollout history
-
-```bash
-kubectl rollout status deployment kubeapp
-kubectl rollout history deployment kubeapp
-kubectl annotate deployment kubeapp kubernetes.io/change-cause="Update image 1.1.0"
-kubectl rollout history deployment kubeapp
-kubectl get rs
-
-kubectl set image deployment kubeapp kubeapp=kubenesia/kubeapp:1.2.0
-kubectl annotate deployment kubeapp kubernetes.io/change-cause="Update image to 1.2.0"
-kubectl rollout history deployment kubeapp
-```
-
-### Deployment update replace strategy
-
-```bash
-kubectl create deployment echo --image=registry.k8s.io/echoserver:1.3 --output=yaml --dry-run=client >echo.yaml
-kubectl apply -f echo.yaml
-kubectl get pods
-kubectl set image deployment echo echoserver=registry.k8s.io/echoserver:1.4
-kubectl get pods
-
-vim echo.yaml
-# strategy:
-#   type: Recreate
-
-kubectl apply -f echo.yaml
-kubectl get pods
-```
-
 ### Deployment rolling update maxUnavailable parameter
 
 ```bash
-cat <<EOF >echo.yaml
+cat <<EOF >kubeapp.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: echo
-  name: echo
+    app: kubeapp
+  name: kubeapp
 spec:
   replicas: 4
   selector:
     matchLabels:
-      app: echo
+      app: kubeapp
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -238,14 +207,63 @@ spec:
   template:
     metadata:
       labels:
-        app: echo
+        app: kubeapp
     spec:
       containers:
-        - image: registry.k8s.io/echoserver:1.3
-          name: echoserver
+        - image: kubenesia/kubeapp:1.0.0
+          name: kubeapp
 EOF
 
-kubectl apply -f echo.yaml
+kubectl apply -f kubeapp.yaml
+kubectl get pods
+
+kubectl set image deployment kubeapp kubeapp=kubenesia/kubeapp:1.1.0
+kubectl get pods
+```
+
+### Deployment rollout history
+
+```bash
+kubectl rollout status deployment kubeapp
+kubectl rollout history deployment kubeapp
+
+kubectl set image deployment kubeapp kubeapp=kubenesia/kubeapp:1.2.0
+
+kubectl rollout status deployment kubeapp
+kubectl rollout history deployment kubeapp
+```
+
+### Deployment recreate strategy
+
+```bash
+cat <<EOF >kubeapp.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeapp
+  name: kubeapp
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: kubeapp
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+        - image: kubenesia/kubeapp:1.0.0
+          name: kubeapp
+EOF
+
+kubectl apply -f kubeapp.yaml
+kubectl get pods
+
+kubectl set image deployment kubeapp kubeapp=kubenesia/kubeapp:1.1.0
 kubectl get pods
 ```
 
@@ -297,6 +315,10 @@ EOF
 kubectl apply -f kuard.yaml
 kubectl get pods
 kubectl describe pods -l app=kuard
+
+sed -i 's/6000/8080/g' kuard.yaml
+kubectl apply -f kuard.yaml
+kubectl describe pods -l app=kuard
 ```
 
 ### Liveness Probe
@@ -343,11 +365,11 @@ kubectl describe pods -l app=kuard
 
 - Try to create a Deployment with image `gcr.io/kuar-demo/kuard-amd64:blue` with 5 replicas and access port 8080 of the container.
 - Try to create a Deployment with the following spec:
-    - Name: `web`
-    - Two images: `nginx:1.27.2` and `gcr.io/kuar-demo/kuard-amd64:blue`
-    - Replica: 10
-    - Startup probe to nginx
-    - Liveness probe to kuard
+  - Name: `web`
+  - Two images: `nginx:1.27.2` and `gcr.io/kuar-demo/kuard-amd64:blue`
+  - Replica: 10
+  - Startup probe to nginx
+  - Liveness probe to kuard
 
 ## DaemonSet
 
@@ -930,7 +952,7 @@ metadata:
 spec:
   containers:
   - name: kubeapp
-    image: kubenesia/kubeapp
+    image: kubenesia/kubeapp:1.2.0
     resources:
       requests:
         memory: 128Gi
@@ -947,6 +969,8 @@ kubectl describe pods
 
 kubectl describe node worker1
 kubectl describe node worker2
+
+kubectl delete pod kubeapp-requests-limits
 ```
 
 # Autoscaling
@@ -1015,74 +1039,575 @@ ab -n 100000 -c 1000 http://$PUBLIC_IP:8080/
 
 # Services & Networking
 
+- Containers inside the same pod can communicate via `localhost`.
+- Each pod in a cluster gets its own unique IP address.
+- All pods can communicate with all other pods by default.
+
 ## Service
 
-### Create Service
+- Service provides a stable IP address or hostname instead of manually using IP of pods.
+
+### ClusterIP
+
+```bash
+cat <<EOF >kubeapp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeapp
+  labels:
+    app: kubeapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kubeapp
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+        - name: kubeapp
+          image: kubenesia/kubeapp:1.2.0
+          ports:
+            - name: http
+              containerPort: 8080
+EOF
+
+cat <<EOF >kubeapp-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeapp
+  labels:
+    app: kubeapp
+spec:
+  type: ClusterIP
+  selector:
+    app: kubeapp
+  ports:
+    - port:80
+      protocol: TCP
+      targetPort: 8080
+EOF
+
+kubectl apply -f kubeapp-deployment.yaml -f kubeapp-service.yaml
+kubectl get svc
+kubectl describe svc kubeapp
+kubectl get ep
+kubectl describe ep
+kubectl get pods -o wide
+kubectl get pods -l app=kubeapp
+
+kubectl run test -ti --rm --image=kubenesia/kubebox -- sh
+curl kubeapp
+nslookup kubeapp
+exit
+```
+
+### ExternalName
+
+```bash
+cat <<EOF >get-ip-service.yaml
+apiVersion: v1
+kind: ExternalName
+metadata:
+  name: get-ip
+spec:
+  type: ExternalName
+  externalName: icanhazip.com
+EOF
+
+kubectl apply -f get-ip-service.yaml
+kubectl get svc
+kubectl describe svc get-ip
+
+kubectl run test -it --rm --image=kubenesia/kubebox -- sh
+curl get-ip
+nslookup get-ip
+exit
+```
+
+### NodePort
+
+```bash
+cat <<EOF >kubeapp-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeapp
+spec:
+  type: NodePort
+  selector:
+    app: kubeapp
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+EOF
+
+kubectl apply -f kubeapp-service.yaml
+kubectl get svc
+kubectl describe svc kubeapp
+
+curl $PUBLIC_IP:$NODEPORT
+```
+
+### Headless Service
+
+- Used to bypass the cluster-wide IP address, name will be resolved directly to pod IPs.
+
+```bash
+cat <<EOF >kubeapp-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kubeapp
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: kubeapp
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+EOF
+
+kubectl apply -f kubeapp-service.yaml
+kubectl get svc
+kubectl describe svc kubeapp
+
+kubectl run test -it --rm --image=kubenesia/kubebox -- sh
+curl kubeapp
+nslookup kubeapp
+exit
+```
 
 ## Ingress
 
-### Create ingress
+- Route HTTP/HTTPS traffic into cluster workloads.
+
+### Install ingress controller
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.12.0-beta.0/deploy/static/provider/baremetal/deploy.yaml
+kubectl get pods -n ingress-nginx
+kubectl get svc -n ingress-nginx
+```
+
+### Create Deployment & Service
+
+```bash
+kubectl create deployment blue --image=gcr.io/kuar-demo/kuard-amd64:blue --port=8080
+kubectl create deployment green --image=gcr.io/kuar-demo/kuard-amd64:green --port=8080
+
+kubectl expose deployment blue --port=80 --target-port=8080
+kubectl expose deployment green --port=80 --target-port=8080
+```
+
+### Route by host header
+
+```bash
+kubectl create ingress blue --class=nginx --rule="blue.$WORKER_IP.sslip.io/*=blue:80"
+kubectl create ingress green --class=nginx --rule="green.$WORKER_IP.sslip.io/*=green:80"
+
+export NODE_PORT=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o yaml | yq '.spec.ports[0].nodePort')
+echo $NODE_PORT
+
+curl http://blue.$WORKER_IP.sslip.io:$NODE_PORT
+curl http://green.$WORKER_IP.sslip.io:$NODE_PORT
+```
 
 ### Route by path
 
-### Route by host header
+```bash
+cat <<EOF >blue-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blue
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: blue
+            port:
+              number: 80
+        path: /blue
+        pathType: Prefix
+EOF
+
+kubectl apply -f blue-ingress.yaml
+
+```bash
+cat <<EOF >green-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: green
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: green
+            port:
+              number: 80
+        path: /green
+        pathType: Prefix
+EOF
+
+kubectl apply -f blue-ingress.yaml -f green-ingress
+
+curl http://$WORKER_IP.sslip.io:$NODE_PORT/blue
+curl http://$WORKER_IP.sslip.io:$NODE_PORT/green
+```
 
 ## Gateway
 
 ### Install Gateway controller implementation
 
+```bash
+kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/release-1.23/examples/gateway/00-crds.yaml
+```
+
 ### Create GatewayClass
+
+```bash
+kubectl apply -f - <<EOF
+kind: GatewayClass
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: contour
+spec:
+  controllerName: projectcontour.io/gateway-controller
+EOF
+```
 
 ### Create Gateway
 
-### Create HTTPRoute
+```bash
+kubectl apply -f - <<EOF
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: projectcontour
+---
+kind: Gateway
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: contour
+  namespace: projectcontour
+spec:
+  gatewayClassName: contour
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+EOF
 
-### Test application
+kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
 
-### Route by path
+kubectl apply -f - <<EOF
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: contour
+  namespace: projectcontour
+data:
+  contour.yaml: |
+    gateway:
+      gatewayRef:
+        name: contour
+        namespace: projectcontour
+EOF
+
+kubectl -n projectcontour rollout restart deployment/contour
+
+export NODE_PORT=$(kubectl -n projectcontour get svc envoy -o yaml | yq '.spec.ports[0].nodePort')
+```
 
 ### Route by host header
 
+```bash
+kubectl apply -f - <<EOF
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: blue
+  labels:
+    app: blue
+spec:
+  hostnames:
+  - blue.$WORKER_IP.sslip.io
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: contour
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - kind: Service
+      name: blue
+      port: 80
+EOF
+
+kubectl apply -f - <<EOF
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: green
+  labels:
+    app: green
+spec:
+  hostnames:
+  - green.$WORKER_IP.sslip.io
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: contour
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - kind: Service
+      name: green
+      port: 80
+EOF
+
+curl http://$WORKER_IP.sslip.io:$NODE_PORT/blue
+curl http://$WORKER_IP.sslip.io:$NODE_PORT/green
+```
+
+### Route by path
+
+```bash
+kubectl apply -f - <<EOF
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: blue
+  labels:
+    app: blue
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: contour
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /blue
+    backendRefs:
+    - kind: Service
+      name: blue
+      port: 80
+EOF
+
+kubectl apply -f - <<EOF
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: green
+  labels:
+    app: green
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: contour
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /green
+    backendRefs:
+    - kind: Service
+      name: green
+      port: 80
+EOF
+
+curl $WORKER_IP.sslip.io/blue
+curl $WORKER_IP.sslip.io/green
+```
+
+### Weight
+
+```bash
+kubectl apply -f - <<EOF
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: weight
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: contour
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /weight
+    backendRefs:
+    - kind: Service
+      name: blue
+      port: 80
+      weight: 50
+    - kind: Service
+      name: green
+      port: 80
+      weight: 50
+EOF
+
+curl -I $WORKER_IP:$NODE_PORT/weight
+curl -I $WORKER_IP:$NODE_PORT/weight
+```
+
 ## Network Policy
+
+```bash
+
+```
 
 # Storage
 
+## Set up NFS server
+
+```bash
+sudo apt-get install --yes nfs-kernel-server
+cat <<EOF | sudo tee /etc/exports.conf
+/srv/nfs4 10.0.0.0/8(rw,no_subtree_check,all_squash)
+EOF
+sudo systemctl restart nfs-kernel-server
+sudo mkdir /srv/nfs4
+sudo chown 65534:65534 /srv/nfs4
+```
+
 ## Static provisioning
+
+```bash
+
+```
 
 ## Mount volume on Pod
 
+```bash
+
+```
+
 ## Dynamic provisioning
+
+```bash
+
+```
 
 # Security
 
 ## Additional user
 
+```bash
+
+```
+
 ## Create Role
+
+```bash
+
+```
 
 ## Create RoleBinding
 
+```bash
+
+```
+
 ## Test RBAC
+
+```bash
+
+```
 
 ## Create ServiceAccount
 
+```bash
+
+```
+
 ## Use ServiceAccount in Pod
+
+```bash
+
+```
 
 # Troubleshooting
 
 ## Debugging Pod
 
+```bash
+
+```
+
 ## Debugging Service
+
+```bash
+
+```
 
 ## Debugging cluster
 
+```bash
+
+```
+
 ## Cluster maintenance
+
+```bash
+
+```
 
 ## etcd backup
 
+```bash
+
+```
+
 ## etcd restore
+
+```bash
+
+```
 
 ## Version upgrade
 
+```bash
+
+```
+
 ### Controller
 
+```bash
+
+```
+
 ### Worker
+
+```bash
+
+```
