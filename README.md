@@ -263,6 +263,41 @@ kubectl rollout undo deployment kubeapp
 kubectl rollout undo deployment kubeapp --to-revision=$REVISION_NUMBER
 ```
 
+### Startup Probe
+
+```bash
+cat <<EOF >kuard.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kuard
+  name: kuard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuard
+  template:
+    metadata:
+      labels:
+        app: kuard
+    spec:
+      containers:
+      - image: gcr.io/kuar-demo/kuard-amd64:blue
+        name: kuard-amd64
+        startupProbe:
+          httpGet:
+            path: /ready
+            port: 6000
+EOF
+
+kubectl get pods
+kubectl describe pods -l app=kuard
+```
+
+- Pod will be unhealthy because of failed startup probe. Change the port to 8080 to make it work.
+
 ### Review
 
 - Try to create a Deployment with image `gcr.io/kuar-demo/kuard-amd64:blue` with 5 replicas and access port 8080 of the container.
