@@ -263,6 +263,10 @@ kubectl rollout undo deployment kubeapp
 kubectl rollout undo deployment kubeapp --to-revision=$REVISION_NUMBER
 ```
 
+### Review
+
+- Try to create a Deployment with image `gcr.io/kuar-demo/kuard-amd64:blue` with 5 replicas and access port 8080 of the container.
+
 ## DaemonSet
 
 Ensure all nodes run a copy of a Pod. Usually used for operational tools or add-ons.
