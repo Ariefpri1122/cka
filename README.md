@@ -627,9 +627,82 @@ exit
 
 ### Create Secret
 
+```bash
+kubectl create secret generic kubeapp --from-literal=MODE=development --from-literal=COLOR=blue
+kubectl get secret
+kubectl get secret kubeapp -o yaml
+```
+
 ### Secret as env variable
 
+```bash
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeapp
+  name: kubeapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeapp
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+      - image: kubenesia/kubeapp:1.2.0
+        name: kubeapp
+        envFrom:
+          - secretRef:
+              name: kubeapp
+EOF
+
+kubectl exec -ti deployment/kubeapp -- sh
+printenv
+exit
+```
+
 ### Secret as file
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kubeapp
+  name: kubeapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kubeapp
+  template:
+    metadata:
+      labels:
+        app: kubeapp
+    spec:
+      containers:
+      - image: kubenesia/kubeapp:1.2.0
+        name: kubeapp
+        volumeMounts:
+          - mountPath: /data/config
+            name: config
+      volumes:
+        - name: config
+          configMap:
+            name: kubeapp
+EOF
+
+kubectl exec -ti deployment/kubeapp -- sh
+ls /data/config
+cat /data/config
+exit
+```
 
 ## Node selector
 
