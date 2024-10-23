@@ -582,7 +582,7 @@ EOF
 
 kubectl apply -f kubeapp-deployment.yaml
 kubectl exec -ti deployment/kubeapp -- sh
-printenv
+printenv | egrep 'COLOR=|MODE=|SERVICE='
 exit
 ```
 
@@ -664,7 +664,7 @@ spec:
 EOF
 
 kubectl exec -ti deployment/kubeapp -- sh
-printenv
+printenv | egrep 'COLOR=|MODE=|SERVICE='
 exit
 ```
 
