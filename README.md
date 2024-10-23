@@ -1195,7 +1195,7 @@ exit
 ```bash
 cat <<EOF >get-ip-service.yaml
 apiVersion: v1
-kind: ExternalName
+kind: Service
 metadata:
   name: get-ip
 spec:
