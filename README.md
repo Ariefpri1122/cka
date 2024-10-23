@@ -579,7 +579,7 @@ spec:
 EOF
 
 kubectl apply -f kubeapp-deployment.yaml
-kubectl exec -ti -l app=kubeapp -- sh
+kubectl exec -ti deployment/kubeapp -- sh
 printenv
 ```
 
