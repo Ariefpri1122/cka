@@ -1354,7 +1354,7 @@ spec:
         pathType: Prefix
 EOF
 
-kubectl apply -f blue-ingress.yaml -f green-ingress
+kubectl apply -f blue-ingress.yaml -f green-ingress.yaml
 
 curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/blue
 curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/green
