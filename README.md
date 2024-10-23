@@ -548,6 +548,8 @@ data:
 EOF
 
 kubectl apply -f kubeapp-configmap.yaml
+kubectl get cm kubeapp
+kubectl get cm kubeapp -o yaml
 ```
 
 ### ConfigMap as env variable
