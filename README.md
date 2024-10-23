@@ -1200,7 +1200,7 @@ metadata:
   name: get-ip
 spec:
   type: ExternalName
-  externalName: icanhazip.com
+  externalName: google.com
 EOF
 
 kubectl apply -f get-ip-service.yaml
