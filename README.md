@@ -706,6 +706,10 @@ cat /data/config
 exit
 ```
 
+### Review
+
+- Create a `postgres` StatefulSet as before, but use a `Secret` to configure `POSTGRES_PASSWORD`.
+
 ## Node selector
 
 - Simplest way to add a constraint for node selection by using node labels as criteria.
