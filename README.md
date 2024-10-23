@@ -1063,7 +1063,7 @@ kubectl delete pod kubeapp-requests-limits
 ## Install metrics-server
 
 ```bash
-curl -o metrics-server.yaml https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+curl -fsSLo metrics-server.yaml https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 vim metrics-server.yaml
 # add --kubelet-insecure-tls under args
 kubectl apply -f metrics-server.yaml
