@@ -815,6 +815,7 @@ kubectl apply -f pod-myapp-gpu-without-tolerations.yaml
 ## Pod affinity & anti-affinity
 
 - Used to constraint inter-pod placement.
+- Use `kubectl explain deployment.spec.template.spec.affinity` to check for available fields.
 
 ### Pod anti-affinity
 
