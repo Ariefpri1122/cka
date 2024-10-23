@@ -1106,7 +1106,7 @@ spec:
 EOF
 
 kubectl apply -f kubeapp.yaml
-kubectl autoscale deployment kubeapp --min=2 --max=10 --cpu-percent=50
+kubectl autoscale deployment kubeapp --min=2 --max=10 --cpu-percent=50 --force
 kubectl get hpa
 ```
 
