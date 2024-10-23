@@ -1235,7 +1235,9 @@ kubectl apply -f kubeapp-service.yaml
 kubectl get svc
 kubectl describe svc kubeapp
 
-curl $PUBLIC_IP:$NODEPORT
+export PUBLIC_IP=$(curl -s icanhazip.com)
+export NODE_PORT=$(kubectl get svc kubeapp-service -o yaml | yq '.spec.ports[0].nodePort')
+curl "$PUBLIC_IP:$NODE_PORT"
 ```
 
 ### Headless Service
