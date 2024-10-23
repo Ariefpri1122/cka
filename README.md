@@ -1694,3 +1694,25 @@ sudo chown 65534:65534 /srv/nfs4
 ```bash
 
 ```
+
+# Exam tips
+
+## Example tasks
+
+1. Create PV
+2. Backup & Restore etcd
+3. Troubleshoot node NotReady
+4. Multi container pod with emptyDir volume
+5. Create Deployment
+6. Create Ingress
+7. Create Pod
+8. ReadinessProbe
+9. Fix Service selector
+10. Upgrade master node
+11. Create ClusterRole + ClusterRoleBinding
+12. Scale replica
+13. NodeSelector
+14. PVC
+15. NetworkPolicy
+16. Static Pod
+17. Tshoot NodePort
