@@ -1299,6 +1299,10 @@ kubectl expose deployment green --port=80 --target-port=8080
 kubectl create ingress blue --class=nginx --rule="blue.$PUBLIC_IP.sslip.io/*=blue:80"
 kubectl create ingress green --class=nginx --rule="green.$PUBLIC_IP.sslip.io/*=green:80"
 
+kubectl get ingress
+kubectl get ingress blue -o yaml
+kubectl get ingress green -o yaml
+
 export NODE_PORT=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o yaml | yq '.spec.ports[0].nodePort')
 echo $NODE_PORT
 
