@@ -1171,7 +1171,7 @@ spec:
   selector:
     app: kubeapp
   ports:
-    - port:80
+    - port: 80
       protocol: TCP
       targetPort: 8080
 EOF
@@ -1587,13 +1587,72 @@ sudo chown 65534:65534 /srv/nfs4
 ## Static provisioning
 
 ```bash
+export PUBLIC_IP=$(curl -s icanhazip.com)
 
+cat <<EOF >test-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: test-pv
+spec:
+  storageClassName: "nfs"
+  capacity:
+    storage: 1Gi
+  accessModes:
+   - ReadWriteMany
+  nfs:
+    server: $PUBLIC_IP
+    path: /srv/nfs4
+EOF
+
+kubectl apply -f test-pv.yaml
+
+kubectl get pv
+kubectl describe pv test-pv
+
+cat <<EOF >test-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc
+spec:
+  storageClassName: "nfs"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+kubectl apply -f test-pvc.yaml
+kubectl get pvc
+kubectl describe pvc test-pvc
 ```
 
 ## Mount volume on Pod
 
 ```bash
+cat <<EOF >nginx-with-pvc.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-with-pvc
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.27.2
+    volumeMounts:
+    - name: html
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: html
+    persistentVolumeClaim:
+      claimName: test-pvc
+EOF
 
+kubectl apply -f nginx-with-pvc.yaml
+kubectl get pods nginx-with-pvc
+kubectl describe pods nginx-with-pvc
 ```
 
 ## Dynamic provisioning
