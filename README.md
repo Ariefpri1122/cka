@@ -1569,7 +1569,33 @@ curl -I $PUBLIC_IP:$NODE_PORT/weight
 ## Network Policy
 
 ```bash
+cat <<EOF >netpol-deny-from-other-ns.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  namespace: default
+  name: deny-from-other-namespaces
+spec:
+  podSelector: {}
+  ingress:
+  - from:
+    - podSelector: {}
+EOF
 
+kubectl apply -f netpol-deny-from-other-ns.yaml
+
+kubectl get networkpolicy
+
+kubectl create ns dev
+kubectl run test -it -n dev --rm --image=kubenesia/kubebox -- sh
+wget -qO- --timeout=2 kubeapp.default
+# wget: download timed out
+
+kubectl run test -it --rm --image=kubenesia/kubebox -- sh
+wget -qO- --timeout=2 kubeapp
+# Hello World!
+
+kubectl delete netpol deny-from-other-namespaces
 ```
 
 # Storage
