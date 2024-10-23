@@ -709,6 +709,7 @@ exit
 ### Review
 
 - Create a `postgres` StatefulSet as before, but use a `Secret` to configure `POSTGRES_PASSWORD`.
+- Check with `kubectl exec -ti postgres-0 -- psql -h 127.0.0.1 -U postgres -p`
 
 ## Node selector
 
