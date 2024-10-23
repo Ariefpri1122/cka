@@ -1289,8 +1289,8 @@ kubectl get svc -n ingress-nginx
 kubectl create deployment blue --image=gcr.io/kuar-demo/kuard-amd64:blue --port=8080
 kubectl create deployment green --image=gcr.io/kuar-demo/kuard-amd64:green --port=8080
 
-kubectl expose deployment blue --port=80 --target-port=8000
-kubectl expose deployment green --port=80 --target-port=8000
+kubectl expose deployment blue --port=80 --target-port=8080
+kubectl expose deployment green --port=80 --target-port=8080
 ```
 
 ### Route by host header
