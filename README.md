@@ -1360,6 +1360,15 @@ curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/blue
 curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/green
 ````
 
+### Review
+
+- Deploy kubeapp application
+  - Use image: `kubenesia/kubeapp:1.2.0`.
+  - Minimum CPU is 0.5 core.
+  - Minimum memory is 128 MiB.
+  - Scale based on CPU utilization with maximum replicas of 10.
+  - Make it accessible on `kubeapp.$PUBLIC_IP.sslip.io`.
+
 ## Gateway
 
 ### Install Gateway controller implementation
@@ -1604,6 +1613,51 @@ kubectl delete netpol deny-from-other-namespaces
 
 # Storage
 
+## Share directory between containers inside a pod using emptyDir
+
+```bash
+cat <<EOF >pod-with-empty-dir.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-empty-dir
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.27.2
+    volumeMounts:
+    - name: wwwroot
+      mountPath: /usr/share/nginx/html
+  - name: caddy
+    image: caddy:2.8.4
+    command:
+      - caddy
+      - file-server
+      - --root
+      - /var/www/html
+      - --listen
+      - :8080
+    volumeMounts:
+    - name: wwwroot
+      mountPath: /var/www/html
+  volumes:
+  - name: wwwroot
+    emptyDir:
+      sizeLimit: 500Mi
+EOF
+
+kubectl apply -f pod-with-empty-dir.yaml
+kubectl exec -ti -c nginx pod-with-empty-dir -- bash
+echo "Test emptyDir volume with containers" > /usr/share/nginx/html/index.html
+exit
+
+kubectl port-forward pod-with-empty-dir 1234:80
+curl -v localhost:1234
+
+kubectl port-forward pod-with-empty-dir 1234:8080
+curl -v localhost:1234
+```
+
 ## Set up NFS server
 
 ```bash
@@ -1687,48 +1741,178 @@ kubectl get pods nginx-with-pvc
 kubectl describe pods nginx-with-pvc
 ```
 
-## Dynamic provisioning
-
-```bash
-
-```
-
 # Security
 
-## Additional user
+## Create additional user
+
+### Create certificate
 
 ```bash
+# Create Certificate Signing Request
+openssl req -new -keyout andy.key -out andy.csr -subj "/CN=andy/O=dev"
 
+# Sign the CSR using Kubernetes CA
+sudo openssl x509 -req -in andy.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out andy.crt -days 365
+
+# View the signed certificate content
+openssl x509 -in andy.crt -text -noout
+```
+
+### Create new kubeconfig context
+
+```bash
+# Create new context for the new user
+kubectl config set-credentials andy --client-certificate=andy.crt --client-key=andy.key
+kubectl config set-context andy@kubernetes --cluster=kubernetes --user=andy
+
+# Change context
+kubectl config get-contexts
+kubectl config use-context andy@kubernetes
+
+# Both commands will fail
+kubectl get nodes
+kubectl get pods
+
+# View content of kubeconfig
+cat ~/.kube/config
+```
+
+### Create ClusterRole
+
+```bash
+kubectl config use-context kubernetes-admin@kubernetes
+
+cat <<EOF >andy-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: andy
+rules:
+  - apiGroups: ""
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+EOF
+
+kubectl apply -f andy-clusterrole.yaml
+```
+
+### Create ClusterRoleBinding
+
+```bash
+cat <<EOF >andy-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: andy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  name: andy
+subjects:
+  - kind: User
+    name: andy
+EOF
+
+kubectl apply -f andy-clusterrolebinding.yaml
+```
+
+## Test RBAC (ClusterRole)
+
+```bash
+kubectl config use-context andy@kubernetes
+
+# should success
+kubectl get pods -n kubesystem
+kubectl get svc -n kube-system
+
+# should fail
+kubectl get secret -n kube-system
+
+kubectl auth can-i get pods
+kubectl auth can-i get svc
+
+kubectl auth can-i get secrets
+
+# back to admin
+kubectl config use-context admin@kubernetes
+
+# delete ClusterRole and ClusterRoleBinding
+kubectl delete clusterrolebinding andy
+kubectl delete clusterrole andy
 ```
 
 ## Create Role
 
 ```bash
+cat <<EOF >andy-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: andy
+rules:
+  - apiGroups: ""
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+EOF
 
+kubectl apply -f andy-role.yaml
 ```
 
 ## Create RoleBinding
 
 ```bash
-
+cat <<EOF >andy-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: andy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io/v1
+  kind: Role
+  name: andy
+subjects:
+  - kind: User
+    name: andy
+EOF
 ```
 
-## Test RBAC
+## Test RBAC (Role)
 
 ```bash
+kubectl config use-context andy@kubernetes
 
-```
+# should success
+kubectl get pods
+kubectl get svc
 
-## Create ServiceAccount
+# should fail
+kubectl get pods -n kube-system
+kubectl get svc -n kube-system
 
-```bash
+# should fail
+kubectl get secret
 
-```
+kubectl auth can-i get pods
+kubectl auth can-i get svc
 
-## Use ServiceAccount in Pod
+kubectl auth can-i get secrets
 
-```bash
+# back to admin
+kubectl config use-context admin@kubernetes
 
+# delete Role and RoleBinding
+kubectl delete rolebinding andy
+kubectl delete role andy
 ```
 
 # Troubleshooting
@@ -1736,22 +1920,55 @@ kubectl describe pods nginx-with-pvc
 ## Debugging Pod
 
 ```bash
+# list pods
+kubectl get pods -o wide
 
+# execute command on running pods
+kubectl exec $POD_NAME - $COMMAND
+
+# interactive command
+kubectl exec -it $POD_NAME -- sh
+
+# get details of pod
+kubectl describe pod $POD_NAME
+kubectl get pod $POD_NAME -o yaml
+
+# show logs of pod
+kubectl logs $POD_NAME
+kubectl logs $POD_NAME -f
 ```
 
 ## Debugging Service
 
 ```bash
+# list services
+kubectl get svc
 
+# get details of service
+kubectl describe svc $SVC_NAME
+
+# get list of pods based on labels
+kubectl get pods -l $KEY=$VALUE
 ```
 
 ## Debugging cluster
 
 ```bash
+# list nodes
+kubectl get node
 
+# show cluster status
+kubectl cluster-info
+
+# check log of control plane components
+kubectl logs -n kube-system -l=component=kube-apiserver
+kubectl logs -n kube-system -l=component=kube-scheduler
+kubectl logs -n kube-system -l=component=kube-controller-manager
+kubectl logs -n kube-system -l=component=etcd
+sudo systemctl status kubelet
 ```
 
-## Cluster maintenance
+# Cluster maintenance
 
 ```bash
 
@@ -1760,31 +1977,62 @@ kubectl describe pods nginx-with-pvc
 ## etcd backup
 
 ```bash
+# backup existing etcd manifests
+sudo cp /etc/kubernetes/manifests/etcd.yaml etcd.yaml
 
+# install client tools
+sudo apt-get install etcd-client
+
+# do backup
+sudo ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save snapshot.db
+
+# view backup result
+sudo ETCDCTL_API=3 etcdctl --write-out=table snapshot status snapshot.db
 ```
 
 ## etcd restore
 
 ```bash
+sudo ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --name=master --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --data-dir /var/lib/etcd-from-backup --initial-cluster=master=https://127.0.0.1:2380 --initial-cluster-token etcd-cluster-1 --initial-advertise-peer-urls=https://127.0.0.1:2380 snapshot restore snapshot.db --skip-hash-check=true
 
+sudo vim /etc/kubernetes/manifests/etcd.yaml
+# replace /var/lib/etcd to /var/lib/etcd-from-backup
 ```
 
 ## Version upgrade
 
-```bash
-
-```
-
 ### Controller
 
 ```bash
-
+kubectl get nodes -o wide
+sudo vim /etc/apt/sources.list.d/kubernetes.list
+# set version to 1.31
+sudo apt-get update && apt-cache madison kubeadm
+sudo apt-get install kubeadm=1.31.0-1.1 kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
+sudo kubeadm upgrade apply v1.31.0 --etcd-upgrade=false
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+kubectl get nodes -o wide
 ```
 
 ### Worker
 
 ```bash
+ssh $MASTER
+kubectl get nodes -o wide
+kubectl cordon $WORKER_NODE
+kubectl drain $WORKER_NODE --ignore-daemonsets --delete-emptydir-data --force
 
+ssh $WORKER_IP
+sudo vim /etc/apt/sources.list.d/kubernetes.list
+# set version to 1.31
+sudo apt-get update && apt-cache madison kubeadm
+sudo apt-get install kubeadm=1.31.0-1.1 kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+ssh $MASTER
+kubectl uncordon $WORKER_NODE
 ```
 
 # Exam tips
