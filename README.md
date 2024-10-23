@@ -1156,7 +1156,7 @@ spec:
           image: kubenesia/kubeapp:1.2.0
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 8000
 EOF
 
 cat <<EOF >kubeapp-service.yaml
@@ -1173,7 +1173,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8000
 EOF
 
 kubectl apply -f kubeapp-deployment.yaml -f kubeapp-service.yaml
@@ -1228,7 +1228,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8000
 EOF
 
 kubectl apply -f kubeapp-service.yaml
@@ -1256,7 +1256,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 8000
 EOF
 
 kubectl apply -f kubeapp-service.yaml
