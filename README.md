@@ -1296,14 +1296,14 @@ kubectl expose deployment green --port=80 --target-port=8080
 ### Route by host header
 
 ```bash
-kubectl create ingress blue --class=nginx --rule="blue.$WORKER_IP.sslip.io/*=blue:80"
-kubectl create ingress green --class=nginx --rule="green.$WORKER_IP.sslip.io/*=green:80"
+kubectl create ingress blue --class=nginx --rule="blue.$PUBLIC_IP.sslip.io/*=blue:80"
+kubectl create ingress green --class=nginx --rule="green.$PUBLIC_IP.sslip.io/*=green:80"
 
 export NODE_PORT=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o yaml | yq '.spec.ports[0].nodePort')
 echo $NODE_PORT
 
-curl http://blue.$WORKER_IP.sslip.io:$NODE_PORT
-curl http://green.$WORKER_IP.sslip.io:$NODE_PORT
+curl http://blue.$PUBLIC_IP.sslip.io:$NODE_PORT
+curl http://green.$PUBLIC_IP.sslip.io:$NODE_PORT
 ```
 
 ### Route by path
@@ -1352,8 +1352,8 @@ EOF
 
 kubectl apply -f blue-ingress.yaml -f green-ingress
 
-curl http://$WORKER_IP.sslip.io:$NODE_PORT/blue
-curl http://$WORKER_IP.sslip.io:$NODE_PORT/green
+curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/blue
+curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/green
 ````
 
 ## Gateway
@@ -1435,7 +1435,7 @@ metadata:
     app: blue
 spec:
   hostnames:
-  - blue.$WORKER_IP.sslip.io
+  - blue.$PUBLIC_IP.sslip.io
   parentRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
@@ -1460,7 +1460,7 @@ metadata:
     app: green
 spec:
   hostnames:
-  - green.$WORKER_IP.sslip.io
+  - green.$PUBLIC_IP.sslip.io
   parentRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
@@ -1476,8 +1476,8 @@ spec:
       port: 80
 EOF
 
-curl http://$WORKER_IP.sslip.io:$NODE_PORT/blue
-curl http://$WORKER_IP.sslip.io:$NODE_PORT/green
+curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/blue
+curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/green
 ```
 
 ### Route by path
@@ -1529,8 +1529,8 @@ spec:
       port: 80
 EOF
 
-curl $WORKER_IP.sslip.io/blue
-curl $WORKER_IP.sslip.io/green
+curl $PUBLIC_IP.sslip.io/blue
+curl $PUBLIC_IP.sslip.io/green
 ```
 
 ### Weight
@@ -1562,8 +1562,8 @@ spec:
       weight: 50
 EOF
 
-curl -I $WORKER_IP:$NODE_PORT/weight
-curl -I $WORKER_IP:$NODE_PORT/weight
+curl -I $PUBLIC_IP:$NODE_PORT/weight
+curl -I $PUBLIC_IP:$NODE_PORT/weight
 ```
 
 ## Network Policy
