@@ -581,6 +581,7 @@ EOF
 kubectl apply -f kubeapp-deployment.yaml
 kubectl exec -ti deployment/kubeapp -- sh
 printenv
+exit
 ```
 
 ### ConfigMap as file
@@ -616,9 +617,10 @@ spec:
 EOF
 
 kubectl apply -f kubeapp-deployment.yaml
-kubectl exec -ti -l app=kubeapp -- sh
+kubectl exec -ti deployment/kubeapp -- sh
 ls /data/config
 cat /data/config
+exit
 ```
 
 ## Secret
