@@ -1087,7 +1087,7 @@ metadata:
   labels:
     app: kubeapp
 spec:
-  replicas: 5
+  replicas: 2
   selector:
     matchLabels:
       app: kubeapp
@@ -1102,10 +1102,11 @@ spec:
         resources:
           requests:
             cpu: 100m
+            memory: 128Mi
 EOF
 
 kubectl apply -f kubeapp.yaml
-kubectl autoscale deployment kubeapp --min=3 --max=10 --cpu-percent=50
+kubectl autoscale deployment kubeapp --min=2 --max=10 --cpu-percent=50
 kubectl get hpa
 ```
 
