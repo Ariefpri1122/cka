@@ -1587,7 +1587,7 @@ sudo chown 65534:65534 /srv/nfs4
 ## Static provisioning
 
 ```bash
-export PUBLIC_IP=$(curl -s icanhazip.com)
+export NFS_SERVER=$(ip -4 a | grep global | head -n 1 | awk '{print $2}' | cut -d '/' -f 1)
 
 cat <<EOF >test-pv.yaml
 apiVersion: v1
@@ -1601,8 +1601,8 @@ spec:
   accessModes:
    - ReadWriteMany
   nfs:
-    server: $PUBLIC_IP
-    path: /srv/nfs4
+    server: $NFS_SERVER
+    path: /srv/nfs4/test-pv
 EOF
 
 kubectl apply -f test-pv.yaml
