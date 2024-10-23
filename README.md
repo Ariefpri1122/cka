@@ -1305,7 +1305,7 @@ curl http://green.$WORKER_IP.sslip.io:$NODE_PORT
 
 ### Route by path
 
-```bash
+````bash
 cat <<EOF >blue-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -1351,7 +1351,7 @@ kubectl apply -f blue-ingress.yaml -f green-ingress
 
 curl http://$WORKER_IP.sslip.io:$NODE_PORT/blue
 curl http://$WORKER_IP.sslip.io:$NODE_PORT/green
-```
+````
 
 ## Gateway
 
