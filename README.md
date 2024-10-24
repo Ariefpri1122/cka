@@ -1900,7 +1900,7 @@ kubectl apply -f andy-role.yaml
 ## Create RoleBinding
 
 ```bash
-cat <<EOF >andy-clusterrolebinding.yaml
+cat <<EOF >andy-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -1914,7 +1914,7 @@ subjects:
     name: andy
 EOF
 
-kubectl apply -f andy-clusterrolebinding.yaml
+kubectl apply -f andy-rolebinding.yaml
 ```
 
 ## Test RBAC (Role)
