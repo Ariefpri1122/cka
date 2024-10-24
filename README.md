@@ -1913,6 +1913,8 @@ subjects:
   - kind: User
     name: andy
 EOF
+
+kubectl apply -f andy-clusterrolebinding.yaml
 ```
 
 ## Test RBAC (Role)
