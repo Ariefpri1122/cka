@@ -1937,7 +1937,7 @@ kubectl auth can-i get svc
 kubectl auth can-i get secrets
 
 # back to admin
-kubectl config use-context admin@kubernetes
+kubectl config use-context kubernetes-admin@kubernetes
 
 # delete Role and RoleBinding
 kubectl delete rolebinding andy
