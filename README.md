@@ -2001,10 +2001,6 @@ sudo systemctl status kubelet
 
 # Cluster maintenance
 
-```bash
-
-```
-
 ## etcd backup
 
 ```bash
