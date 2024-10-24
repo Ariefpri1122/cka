@@ -1582,6 +1582,11 @@ curl -I $PUBLIC_IP:$NODE_PORT/weight
 ## Network Policy
 
 ```bash
+# Create target workload
+kubectl create deployment kubeapp --image=kubenesia/kubeapp:1.2.0 --port=8000
+kubectl expose deployment kubeapp --port=80 --target-port=8000
+
+# Create NetworkPolicy to prevent access from other namespace
 cat <<EOF >netpol-deny-from-other-ns.yaml
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
@@ -1594,20 +1599,19 @@ spec:
   - from:
     - podSelector: {}
 EOF
-
 kubectl apply -f netpol-deny-from-other-ns.yaml
 
+# Check NetworkPolicy
 kubectl get networkpolicy
 
+# Test access from other namespace
 kubectl create ns dev
 kubectl run test -it -n dev --rm --image=kubenesia/kubebox -- sh
-wget -qO- --timeout=2 kubeapp.default
-# wget: download timed out
-
+wget -qO- --timeout=2 kubeapp.default # fail
 kubectl run test -it --rm --image=kubenesia/kubebox -- sh
-wget -qO- --timeout=2 kubeapp
-# Hello World!
+wget -qO- --timeout=2 kubeapp # ok
 
+# Remove NetworkPolicy
 kubectl delete netpol deny-from-other-namespaces
 ```
 
