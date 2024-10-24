@@ -1677,7 +1677,7 @@ curl -v localhost:1234
 
 ```bash
 sudo apt-get install --yes nfs-kernel-server
-cat <<EOF | sudo tee /etc/exports.conf
+cat <<EOF | sudo tee /etc/exports
 /srv/nfs4 10.0.0.0/8(rw,no_subtree_check,all_squash)
 EOF
 sudo systemctl restart nfs-kernel-server
@@ -1727,7 +1727,7 @@ EOF
 
 kubectl apply -f nginx-pvc.yaml
 kubectl get pvc
-kubectl describe pvc nginx-pvc
+kubectl describe pvc nginx
 ```
 
 ## Mount volume on Pod
