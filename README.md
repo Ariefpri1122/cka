@@ -1776,7 +1776,7 @@ kubectl delete pv nginx
 
 ```bash
 # Create Certificate Signing Request
-openssl req -new -keyout andy.key -out andy.csr -subj "/CN=andy/O=dev"
+openssl req -nodes -new -keyout andy.key -out andy.csr -subj "/CN=andy/O=dev"
 
 # Sign the CSR using Kubernetes CA
 sudo openssl x509 -req -in andy.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out andy.crt -days 365
