@@ -1838,7 +1838,7 @@ kind: ClusterRoleBinding
 metadata:
   name: andy
 roleRef:
-  apiGroup: rbac.authorization.k8s.io/v1
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: andy
 subjects:
@@ -1906,7 +1906,7 @@ kind: RoleBinding
 metadata:
   name: andy
 roleRef:
-  apiGroup: rbac.authorization.k8s.io/v1
+  apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: andy
 subjects:
