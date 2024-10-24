@@ -1651,8 +1651,19 @@ spec:
 EOF
 
 kubectl apply -f pod-with-empty-dir.yaml
+
 kubectl exec -ti -c nginx pod-with-empty-dir -- bash
-echo "Test emptyDir volume with containers" > /usr/share/nginx/html/index.html
+echo "Test emptyDir volume with containers" >/usr/share/nginx/html/index.html
+exit
+
+kubectl port-forward pod-with-empty-dir 1234:80
+curl -v localhost:1234
+
+kubectl port-forward pod-with-empty-dir 1234:8080
+curl -v localhost:1234
+
+kubectl exec -ti -c caddy pod-with-empty-dir -- sh
+echo "New page" >/var/www/html/index.html
 exit
 
 kubectl port-forward pod-with-empty-dir 1234:80
