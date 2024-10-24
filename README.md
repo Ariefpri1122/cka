@@ -1883,7 +1883,8 @@ kind: Role
 metadata:
   name: andy
 rules:
-  - apiGroups: ""
+  - apiGroups:
+      - ""
     resources:
       - pods
       - services
