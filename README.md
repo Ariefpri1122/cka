@@ -1675,11 +1675,11 @@ sudo chown 65534:65534 /srv/nfs4
 ```bash
 export NFS_SERVER=$(ip -4 a | grep global | head -n 1 | awk '{print $2}' | cut -d '/' -f 1)
 
-cat <<EOF >test-pv.yaml
+cat <<EOF >nginx-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: test-pv
+  name: nginx
 spec:
   storageClassName: "nfs"
   capacity:
@@ -1688,19 +1688,19 @@ spec:
    - ReadWriteMany
   nfs:
     server: $NFS_SERVER
-    path: /srv/nfs4/test-pv
+    path: /srv/nfs4
 EOF
 
-kubectl apply -f test-pv.yaml
+kubectl apply -f nginx-pv.yaml
 
 kubectl get pv
-kubectl describe pv test-pv
+kubectl describe pv nginx
 
-cat <<EOF >test-pvc.yaml
+cat <<EOF >nginx-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: test-pvc
+  name: nginx
 spec:
   storageClassName: "nfs"
   accessModes:
@@ -1710,19 +1710,19 @@ spec:
       storage: 1Gi
 EOF
 
-kubectl apply -f test-pvc.yaml
+kubectl apply -f nginx-pvc.yaml
 kubectl get pvc
-kubectl describe pvc test-pvc
+kubectl describe pvc nginx-pvc
 ```
 
 ## Mount volume on Pod
 
 ```bash
-cat <<EOF >nginx-with-pvc.yaml
+cat <<EOF >nginx-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx-with-pvc
+  name: nginx
 spec:
   containers:
   - name: nginx
@@ -1733,12 +1733,12 @@ spec:
   volumes:
   - name: html
     persistentVolumeClaim:
-      claimName: test-pvc
+      claimName: nginx
 EOF
 
-kubectl apply -f nginx-with-pvc.yaml
-kubectl get pods nginx-with-pvc
-kubectl describe pods nginx-with-pvc
+kubectl apply -f nginx-pod.yaml
+kubectl get pods nginx
+kubectl describe pods nginx
 ```
 
 # Security
