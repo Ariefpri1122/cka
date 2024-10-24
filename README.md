@@ -1737,8 +1737,16 @@ spec:
 EOF
 
 kubectl apply -f nginx-pod.yaml
-kubectl get pods nginx
 kubectl describe pods nginx
+kubectl get pods nginx -o wide
+
+kubectl port-forward nginx 8080:80
+
+echo "Old landing page" | sudo tee /srv/nfs4/index.html
+curl localhost:8080
+
+echo "New landing page" | sudo tee /srv/nfs4/index.html
+curl localhost:8080
 ```
 
 # Security
