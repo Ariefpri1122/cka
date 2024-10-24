@@ -2050,7 +2050,7 @@ sudo vim /etc/apt/sources.list.d/kubernetes.list
 # set version to 1.31
 sudo apt-get update && apt-cache madison kubeadm
 sudo apt-get install kubeadm=1.31.0-1.1 kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
-sudo kubeadm upgrade apply v1.31.0 --etcd-upgrade=false
+sudo kubeadm upgrade apply v1.31.0 --ignore-preflight-errors=CreateJob
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 kubectl get nodes -o wide
