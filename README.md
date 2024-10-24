@@ -1747,6 +1747,10 @@ curl localhost:8080
 
 echo "New landing page" | sudo tee /srv/nfs4/index.html
 curl localhost:8080
+
+kubectl delete pods nginx
+kubectl delete pvc nginx
+kubectl delete pv nginx
 ```
 
 # Security
