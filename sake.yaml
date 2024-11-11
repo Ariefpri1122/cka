@@ -1,0 +1,85 @@
+disable_verify_host: true
+
+servers:
+  trainer-master:
+    host: 34.101.210.160
+    user: pnm
+    identity_file: private.pem
+  trainer-worker1:
+    host: 34.128.78.252
+    user: pnm
+    identity_file: private.pem
+  trainer-worker2:
+    host: 34.50.67.158
+    user: pnm
+    identity_file: private.pem
+  peserta1-master:
+    host: 34.50.72.79
+    user: pnm
+    identity_file: private.pem
+    tags: [master]
+  peserta1-worker1:
+    host: 34.50.73.156
+    user: pnm
+    identity_file: private.pem
+  peserta1-worker2:
+    host: 34.128.83.150
+    user: pnm
+    identity_file: private.pem
+  peserta2-master:
+    host: 34.101.215.255
+    user: pnm
+    identity_file: private.pem
+    tags: [master]
+  peserta2-worker1:
+    host: 34.128.89.33
+    user: pnm
+    identity_file: private.pem
+  peserta2-worker2:
+    host: 34.128.115.213
+    user: pnm
+    identity_file: private.pem
+  peserta3-master:
+    host: 34.34.220.108
+    user: pnm
+    identity_file: private.pem
+    tags: [master]
+  peserta3-worker1:
+    host: 34.128.86.101
+    user: pnm
+    identity_file: private.pem
+  peserta3-worker2:
+    host: 34.128.102.144
+    user: pnm
+    identity_file: private.pem
+  peserta4-master:
+    host: 34.50.71.76
+    user: pnm
+    identity_file: private.pem
+    tags: [master]
+  peserta4-worker1:
+    host: 34.101.38.167
+    user: pnm
+    identity_file: private.pem
+  peserta4-worker2:
+    host: 34.128.122.94
+    user: pnm
+    identity_file: private.pem
+  peserta5-master:
+    host: 34.101.38.204
+    user: pnm
+    identity_file: private.pem
+    tags: [master]
+  peserta5-worker1:
+    host: 34.101.214.187
+    user: pnm
+    identity_file: private.pem
+  peserta5-worker2:
+    host: 34.101.211.62
+    user: pnm
+    identity_file: private.pem
+  
+tasks:
+  ping:
+    desc: Pong
+    cmd: echo "pong"
