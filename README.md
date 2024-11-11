@@ -157,6 +157,8 @@ spec:
         image: kubenesia/kubeapp:1.0.0
 EOF
 
+kubectl create deployment kubeapp --image=kubenesia/kubeapp:1.0.0 --dry-run=client --output=yaml > kubeapp.yaml
+
 kubectl apply -f kubeapp.yaml
 kubectl get deployment
 kubectl get replicaset
