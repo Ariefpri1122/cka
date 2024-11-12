@@ -1,5 +1,12 @@
 disable_verify_host: true
 
+themes:
+  default:
+    table:
+      prefix: '{{.Name}}'
+    text:
+      prefix: '{{.Name}}'
+
 servers:
   trainer-master:
     host: 34.101.210.160
