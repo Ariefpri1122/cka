@@ -1016,7 +1016,6 @@ spec:
         cpu: 250m
       limits:
         memory: 256Mi
-        cpu: 500m
 EOF
 
 kubectl apply -f pod-requests-limits.yaml
