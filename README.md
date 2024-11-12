@@ -798,7 +798,7 @@ kubectl get pods -o wide
 ### Node selector + Taints without Tolerations
 
 ```bash
-cat <<EOF> pod-myapp-gpu-without-tolerations.yaml
+cat <<EOF >pod-myapp-gpu-without-tolerations.yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -812,6 +812,10 @@ spec:
 EOF
 
 kubectl apply -f pod-myapp-gpu-without-tolerations.yaml
+kubectl get pods -o wide
+
+# Remove taint
+kubectl taint nodes worker1 role-
 ```
 
 ## Pod affinity & anti-affinity
