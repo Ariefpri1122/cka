@@ -1241,7 +1241,7 @@ kubectl get svc
 kubectl describe svc kubeapp
 
 export PUBLIC_IP=$(curl -s icanhazip.com)
-export NODE_PORT=$(kubectl get svc kubeapp-service -o yaml | yq '.spec.ports[0].nodePort')
+export NODE_PORT=$(kubectl get svc kubeapp -o yaml | yq '.spec.ports[0].nodePort')
 curl "$PUBLIC_IP:$NODE_PORT"
 ```
 
