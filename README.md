@@ -1304,6 +1304,7 @@ curl localhost:1234
 ```
 
 - Does it work? If not, what's wrong?
+- Create a Deployment `echo` with image `mendhak/http-https-echo:31`. Create a Service with type `NodePort` to expose the previous Deployment with the same. The application port is `8080`.
 
 ## Ingress
 
