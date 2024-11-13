@@ -1276,6 +1276,35 @@ nslookup kubeapp
 exit
 ```
 
+### Review
+
+- Run the following commands:
+
+```bash
+cat <<EOF >nginx-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    application: nginx
+    role: web
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+EOF
+kubectl apply -f nginx-service.yaml
+kubectl create deployment nginx --image=nginx:1.27.2
+kubectl port-forward svc/nginx --address 0.0.0.0 1234:8080
+curl localhost:1234
+```
+
+- Does it work? If not, what's wrong?
+
 ## Ingress
 
 - Route HTTP/HTTPS traffic into cluster workloads.
