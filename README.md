@@ -1295,7 +1295,7 @@ spec:
   ports:
     - port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8080
 EOF
 kubectl apply -f nginx-service.yaml
 kubectl create deployment nginx --image=nginx:1.27.2
