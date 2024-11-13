@@ -1353,11 +1353,11 @@ kubectl delete deployment green
 kubectl delete svc blue
 kubectl delete svc green
 
-kubectl create deployment blue --image=kubenesia/kubeapp:1.1.0
-kubectl create deployment green --image=kubenesia/kubeapp:1.2.0
+kubectl create deployment blue --image=mendhak/http-https-echo:31
+kubectl create deployment green --image=mendhak/http-https-echo:31
 
-kubectl expose deployment blue --port=80 --target-port=8000
-kubectl expose deployment green --port=80 --target-port=8000
+kubectl expose deployment blue --port=80 --target-port=8080
+kubectl expose deployment green --port=80 --target-port=8080
 
 cat <<EOF >blue-ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -1380,7 +1380,6 @@ EOF
 
 kubectl apply -f blue-ingress.yaml
 
-```bash
 cat <<EOF >green-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
