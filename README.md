@@ -1348,6 +1348,17 @@ curl http://green.$PUBLIC_IP.sslip.io:$NODE_PORT
 ### Route by path
 
 ````bash
+kubectl delete deployment blue
+kubectl delete deployment green
+kubectl delete svc blue
+kubectl delete svc green
+
+kubectl create deployment blue --image=kubenesia/kubeapp:1.1.0
+kubectl create deployment green --image=kubenesia/kubeapp:1.2.0
+
+kubectl expose deployment blue --port=80 --target-port=8000
+kubectl expose deployment green --port=80 --target-port=8000
+
 cat <<EOF >blue-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
