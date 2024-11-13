@@ -1397,12 +1397,18 @@ curl http://$PUBLIC_IP.sslip.io:$NODE_PORT/green
 
 ### Review
 
-- Deploy kubeapp application
-  - Use image: `kubenesia/kubeapp:1.2.0`.
+- Create Deployment `kubeapp1`.
+  - Use image: `kubenesia/kubeapp:1.1.0`.
   - Minimum CPU is 0.5 core.
   - Minimum memory is 128 MiB.
   - Scale based on CPU utilization with maximum replicas of 10.
-  - Make it accessible on `kubeapp.$PUBLIC_IP.sslip.io`.
+  - Make it accessible on `kubeapp1.$PUBLIC_IP.sslip.io`.
+- Create Deployment `kubeapp2`.
+  - Use image: `kubenesia/kubeapp:1.2.0`.
+  - Minimum CPU is 1/4 core.
+  - Minimum memory is 64 MiB.
+  - Scale based on CPU utilization with maximum replicas of 2.
+  - Make it accessible on `kubeapp2.$PUBLIC_IP.sslip.io`.
 
 ## Gateway
 
