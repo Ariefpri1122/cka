@@ -2105,6 +2105,9 @@ sudo vim /etc/apt/sources.list.d/kubernetes.list
 # set version to 1.31
 sudo apt-get update && apt-cache madison kubeadm
 sudo apt-get install kubeadm=1.31.2-1.1 kubelet=1.31.2-1.1 kubectl=1.31.2-1.1
+sudo kubeadm upgrade plan --ignore-preflight-errors all
+sudo killall -s SIGTERM kube-apiserver
+sleep 20
 sudo kubeadm upgrade apply v1.31.2 --ignore-preflight-errors all
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
@@ -2123,7 +2126,8 @@ ssh $WORKER_IP
 sudo vim /etc/apt/sources.list.d/kubernetes.list
 # set version to 1.31
 sudo apt-get update && apt-cache madison kubeadm
-sudo apt-get install kubeadm=1.31.0-1.1 kubelet=1.31.0-1.1 kubectl=1.31.0-1.1
+sudo apt-get install kubeadm=1.31.2-1.1 kubelet=1.31.2-1.1 kubectl=1.31.2-1.1
+sudo kubeadm upgrade node
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 
