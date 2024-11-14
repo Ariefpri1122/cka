@@ -2100,6 +2100,7 @@ kubectl get ns before-backup
 ### Controller
 
 ```bash
+kubectl -n kube-system edit configmap kubeadm-config # add featureGates.ControlPlaneKubeletLocalMode: true
 kubectl get nodes -o wide
 sudo vim /etc/apt/sources.list.d/kubernetes.list
 # set version to 1.31
