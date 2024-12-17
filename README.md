@@ -127,6 +127,35 @@ kubectl get pods -n kube-system | grep calico
 
 # Workload & Scheduling
 
+## Pod
+
+- The smallest unit of workload in Kubernetes.
+- Can't be updated.
+- Not recommended to create it directly. Instead, create Deployment or DaemonSet.
+
+### Create Pod
+
+```bash
+# Imperative
+kubectl run nginx --image=nginx:1.27.2
+kubectl delete pods nginx
+
+# Declarative
+cat <<EOF >nginx.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.27.2
+EOF
+
+kubectl apply -f nginx.yaml
+kubectl delete pod nginx
+```
+
 ## Deployment
 
 - Manage a set of Pods to run an application workload, usually stateless application.
