@@ -465,7 +465,6 @@ kubectl delete -f fluentd-elasticsearch.yaml
 
 - Create a DaemonSet with image `nginx:1.27.2`, make sure it doesn't scheduled on controller node.
 - Create a DaemonSet with image `httpd:2.4.62`, make sure it scheduled on all nodes including the controller.
-- Create a DaemonSet with image `caddy:2.8.4`, schedule only on nodes with label role=web.
 
 ## StatefulSet
 

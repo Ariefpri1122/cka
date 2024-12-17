@@ -9,82 +9,47 @@ themes:
 
 servers:
   trainer-master:
-    host: 34.101.210.160
-    user: pnm
+    host: 34.101.127.24
+    user: nutanix
     identity_file: private.pem
   trainer-worker1:
-    host: 34.128.78.252
-    user: pnm
+    host: 34.50.70.53
+    user: nutanix
     identity_file: private.pem
   trainer-worker2:
-    host: 34.50.67.158
-    user: pnm
+    host: 34.101.106.218
+    user: nutanix
     identity_file: private.pem
   peserta1-master:
-    host: 34.50.72.79
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.95.127
+    user: nutanix
     tags: [master]
   peserta1-worker1:
-    host: 34.50.73.156
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.118.220
+    user: nutanix
   peserta1-worker2:
-    host: 34.128.83.150
-    user: pnm
-    identity_file: private.pem
+    host: 34.128.66.27
+    user: nutanix
   peserta2-master:
-    host: 34.101.215.255
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.112.173
+    user: nutanix
     tags: [master]
   peserta2-worker1:
-    host: 34.128.89.33
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.218.146
+    user: nutanix
   peserta2-worker2:
-    host: 34.128.115.213
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.211.172
+    user: nutanix
   peserta3-master:
-    host: 34.34.220.108
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.81.109
+    user: nutanix
     tags: [master]
   peserta3-worker1:
-    host: 34.128.86.101
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.40.55
+    user: nutanix
   peserta3-worker2:
-    host: 34.128.102.144
-    user: pnm
-    identity_file: private.pem
-  peserta4-master:
-    host: 34.50.71.76
-    user: pnm
-    identity_file: private.pem
-    tags: [master]
-  peserta4-worker1:
-    host: 34.101.38.167
-    user: pnm
-    identity_file: private.pem
-  peserta4-worker2:
-    host: 34.128.122.94
-    user: pnm
-    identity_file: private.pem
-  peserta5-master:
-    host: 34.101.38.204
-    user: pnm
-    identity_file: private.pem
-    tags: [master]
-  peserta5-worker1:
-    host: 34.101.214.187
-    user: pnm
-    identity_file: private.pem
-  peserta5-worker2:
-    host: 34.101.211.62
-    user: pnm
-    identity_file: private.pem
+    host: 34.101.63.217
+    user: nutanix
   
 tasks:
   ping:
